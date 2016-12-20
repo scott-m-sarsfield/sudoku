@@ -1,0 +1,403 @@
+/* styles.css */
+
+/*
+Most of my styles will likely be at the component level.  But this is a nice backup.
+*/
+
+*{
+    font-family: monospace;;
+}
+
+html,body{
+    margin:0;
+    padding:0;
+    background: #dddddd;
+    height:100%;
+    width:100%;
+    overflow: hidden;
+}
+
+button{
+    margin:0;
+    padding:0;
+}
+
+#content{
+    position:absolute;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+}
+
+
+.game-header{
+    text-align: center;
+    font-size: 1.5em;
+    font-family: monospace;
+    background: #404040;
+    color:white;
+    padding:0.5em;
+    letter-spacing: 3px;
+}
+
+td.value_highlight{
+    background:  rgba(0,170,186,0.7);
+}
+td.option_highlight{
+    background: rgba(120,120,120,0.7);
+}
+
+button{
+    font-size: 1.0em;
+}
+
+.button-panel{
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    height:12em;
+}
+
+.button-panel .clear-button-container{
+    position:absolute;
+    left:0;
+    width:25%;
+    padding: 0.5em;
+    box-sizing: border-box;
+    height:11.5em;
+    border-right: 1px solid white;
+}
+
+.button-panel .option-buttons-container{
+    width:75%;
+    position: absolute;
+    right:0;
+}
+
+.button-panel .option-buttons-container button{
+    width:31%;
+    padding:0.5em 0;
+    margin:0.5em 1%;
+    border:none;
+    border-radius: 0.2em;
+    font-family: monospace;
+    height:2em;
+    box-sizing: border-box;
+    font-size: 1.2em;
+    overflow: hidden;
+
+}
+
+.button-panel button.clear{
+    width:100%;
+    background: #f0f0f0;
+    padding:0.5em 0;
+    box-sizing: border-box;
+    border:none;
+    border-radius: 0.2em;
+    font-family: monospace;
+    height:4em;
+    margin: 2em 0;
+    box-sizing: border-box;
+    font-size: 1.2em;
+    overflow: hidden;
+}
+
+.button-panel button.on{
+    box-shadow: 0 0 0 0.1em inset,0 -0.1em 2em inset;
+    /*border: 0.2em solid;
+background: #999;
+font-weight: bold;
+padding: 0.3em 0em;*/
+}
+.button-panel button{
+    background: #f8f8f8;
+    box-sizing: border-box;
+}
+
+/************************************************************/
+
+#check-solution-panel{
+    position: relative;
+    width:100%;
+    padding-top:2.5em;
+    margin-bottom: 0.5em;
+}
+
+#check-solution-panel div.button{
+    position: absolute;
+    left:0;
+    right:0;
+    top:0;
+    margin:0.5em 0.5em 0 0.5em;
+}
+#check-solution-panel div.result{
+    background: white;
+    margin:0 0.5em;
+    border: 1px solid;
+    padding:0.5em;
+    text-align: center;
+}
+
+#check-solution-panel button{
+    width:100%;
+    background: #00aaba;
+    border:none;
+    cursor:pointer;
+    padding:0.5em 0;
+    letter-spacing: 2px;
+    font-weight: bold;
+    box-shadow: 0 -3px 20px 1px #00636C inset;
+}
+
+#check-solution-panel div button{
+}
+
+.sudoku-grid{
+    background: white;
+}
+
+
+
+/************************************************************/
+#control-panel{
+    color:white;
+    margin:0 0.5em;
+    border-radius: 0.2em;
+    overflow: hidden;
+    border: 1px solid black;
+    position: absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    margin-bottom:1em;
+}
+
+#control-panel div.mode-selection{
+}
+
+div.mode-selection button{
+    width: 50%;
+    border: none;
+    color:white;
+    padding: 0.5em 0;
+}
+
+/* colors */
+
+div.mode-selection button{
+    outline: none;
+}
+
+div.mode-selection button.values{
+    background: #00aaba;
+    color:black;
+    letter-spacing: 1px;
+}
+
+div.mode-selection button.notes{
+    background: #404040;
+    letter-spacing: 1px;
+}
+
+#control-panel.value-mode{
+    background:#00aaba;/*#606060;*/
+}
+
+#control-panel.value-mode div.mode-selection button.values{
+    box-shadow: 0 20px 20px -20px white inset;
+}
+
+#control-panel.value-mode div.mode-selection button.notes{
+    box-shadow: 15px -20px 20px -20px black inset;
+}
+
+#control-panel.note-mode{
+    background:#404040;
+}
+#control-panel.note-mode div.mode-selection button.notes{
+    box-shadow: 0 20px 20px -20px #777 inset;
+}
+
+#control-panel.note-mode div.mode-selection button.values{
+    box-shadow: -20px -20px 20px -20px #00636C inset;
+}
+
+
+#new-game-button{
+    position: absolute;
+    top:0;
+    left:0;
+    line-height: 2em;
+    background: none;
+    color:white;
+    border:none;
+    margin-left:0.5em;
+    outline:none;
+    text-decoration: underline;
+    cursor:pointer;
+}
+
+
+
+/************************************************************/
+
+#screen{
+    position: absolute;
+    z-index: 15;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+    background: rgba(0,0,0,0.6);
+    opacity:0;
+    transition: 1s;
+}
+
+#screen.visible{
+    opacity: 1;
+}
+
+#screen.inactive{
+    display: none;
+}
+
+#menu *{
+    font-family: 'Sigmar One', sans-serif;
+}
+
+/* offscreen */
+#menu{
+  position: absolute;
+  width:90%;
+  height:90%;
+  background: rgba(224,224,224,0.9);
+  top:-100%;
+  left:0;
+  right:0;
+  bottom:100%;
+  margin:auto;
+
+  font-family: 'Sigmar One', sans-serif;
+  text-shadow:
+                /* white outline */
+                0.05em 0.05em white,
+                0.05em -0.05em white,
+                -0.05em -0.05em white,
+                -0.05em 0.05em white,
+                0px 0.05em white,
+                0px -0.05em white,
+                0.05em 0px white,
+                -0.05em 0px white,
+
+                /* blue outline */
+
+                0.1em 0.1em ,
+                0.1em -0.1em ,
+                -0.1em -0.1em ,
+                -0.1em 0.1em ,
+                0px 0.1em ,
+                0px -0.1em ,
+                0.1em 0px ,
+                -0.1em 0px
+              ;
+  font-size: 3em;
+  letter-spacing: 0.1em;
+  color:#00aaba;
+  z-index: 20;
+}
+
+#menu ul{
+  list-style: none;
+  margin:1em 0 0 0;
+  padding:0;
+  text-align: center;
+  color:#880000;
+  font-size: 0.8em;
+  letter-spacing: 0.2em;
+  line-height: 2em;
+  text-shadow:
+                /* white outline */
+                0.05em 0.05em white,
+                0.05em -0.05em white,
+                -0.05em -0.05em white,
+                -0.05em 0.05em white,
+                0px 0.05em white,
+                0px -0.05em white,
+                0.05em 0px white,
+                -0.05em 0px white,
+
+                /* blue outline */
+
+                0.1em 0.1em ,
+                0.1em -0.1em ,
+                -0.1em -0.1em ,
+                -0.1em 0.1em ,
+                0px 0.1em ,
+                0px -0.1em ,
+                0.1em 0px ,
+                -0.1em 0px
+              ;
+}
+
+#menu ul li{
+  transition: 0.5s;
+}
+
+#menu ul li button{
+  background: transparent;
+  border:none;
+  font:inherit;
+  text-shadow: inherit;
+  color:inherit;
+  cursor:pointer;
+  outline:none;
+}
+
+#menu ul li:hover{
+  color:#440000;
+  text-shadow:
+                /* white outline */
+                0.05em 0.05em white,
+                0.05em -0.05em white,
+                -0.05em -0.05em white,
+                -0.05em 0.05em white,
+                0px 0.05em white,
+                0px -0.05em white,
+                0.05em 0px white,
+                -0.05em 0px white,
+
+                /* blue outline */
+
+                0.1em 0.1em ,
+                0.1em -0.1em ,
+                -0.1em -0.1em ,
+                -0.1em 0.1em ,
+                0px 0.1em ,
+                0px -0.1em ,
+                0.1em 0px ,
+                -0.1em 0px
+              ;
+}
+
+
+#menu.enteredScene{
+  top:0;
+  bottom:0;
+}
+
+/************************************************************/
+
+
+@media screen and (min-width:801px) {
+    body{
+
+    }
+}
+
+@media screen and (max-width: 800px) {
+    body{
+
+    }
+}
