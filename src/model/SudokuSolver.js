@@ -1,5 +1,4 @@
 /* eslint-disable func-names, unicorn/filename-case, no-throw-literal */
-/* global window */
 
 import SudokuGrid from './SudokuGrid';
 

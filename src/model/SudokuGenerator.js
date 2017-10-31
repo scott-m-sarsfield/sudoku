@@ -1,4 +1,4 @@
-/* eslint-disable func-names, one-var, unicorn/filename-case */
+/* eslint-disable func-names, unicorn/filename-case */
 
 import clone from 'clone';
 import SudokuGrid from './SudokuGrid';
@@ -18,7 +18,8 @@ const GRID_SIZE = 9;
 // Seed an initial 12.
 SudokuGenerator.prototype.randomInitCells = function randomInitCells() {
 	const cells = [];
-	let i, j;
+	let i;
+	let j;
 	const l = GRID_SIZE;
 	for (i = 0; i < l; i++) {
 		cells.push([]);
@@ -49,7 +50,8 @@ SudokuGenerator.prototype.randomInitCells = function randomInitCells() {
 };
 
 SudokuGenerator.prototype.getSolvedSudoku = function getSolvedSudoku() {
-	let cells, grid;
+	let cells;
+	let grid;
 
 	while (!(grid && grid.valid && grid.valid(false))) {
 		cells = this.randomInitCells();
@@ -85,7 +87,8 @@ SudokuGenerator.prototype.unsetNCells = function unsetNCells(cells, n) {
 		o[j] = false;
 	}
 
-	let grid, solver;
+	let grid;
+	let solver;
 
 	let m = 0;
 

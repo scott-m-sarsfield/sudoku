@@ -1,5 +1,5 @@
 /* jshint esversion:6 */
-/* eslint-disable func-names, one-var, unicorn/filename-case */
+/* eslint-disable func-names, unicorn/filename-case */
 
 const GRID_SIZE = 9;
 const BOX_SIZE = 3;
@@ -32,7 +32,8 @@ SudokuCell.prototype.toggleOption = function toggleOption(option) {
 
 function SudokuGrid() {
 	this.cells = [];
-	let i, j;
+	let i;
+	let j;
 	for (i = 0; i < GRID_SIZE; i++) {
 		const arr = [];
 		for (j = 0; j < GRID_SIZE; j++) {
@@ -55,7 +56,8 @@ SudokuGrid.prototype.getUnsolvedGrid = function getUnsolvedGrid() {
 SudokuGrid.prototype.toString = function () {
 	let str = '\n';
 
-	let i, j;
+	let i;
+	let j;
 	for (i = 0; i < GRID_SIZE; i++) {
 		if (i === 3 || i === 6) {
 			str += Array(23).join('=') + '\n';
@@ -82,11 +84,12 @@ SudokuGrid.prototype.toMatrix = function toMatrix() {
 
 SudokuGrid.prototype.setCells = function setCells(cells) {
 	if (cells && (Array.isArray(cells))) {
-		let i, j;
+		let i;
+		let j;
 		for (i = 0; i < GRID_SIZE; i++) {
 			for (j = 0; j < GRID_SIZE; j++) {
-				const _cell = this.cells[i][j],
-					sourceCell = cells[i][j];
+				const _cell = this.cells[i][j];
+				const sourceCell = cells[i][j];
 
 				if (sourceCell instanceof SudokuCell) {
 					_cell.value = sourceCell.value;
@@ -107,7 +110,8 @@ SudokuGrid.prototype.setCells = function setCells(cells) {
 
 SudokuGrid.prototype.initializeToGivens = function initializeToGivens() {
 	this.setAssignedAsGiven();
-	let i, j;
+	let i;
+	let j;
 	for (i = 0; i < GRID_SIZE; i++) {
 		for (j = 0; j < GRID_SIZE; j++) {
 			const c = this.cells[i][j];
@@ -117,7 +121,8 @@ SudokuGrid.prototype.initializeToGivens = function initializeToGivens() {
 };
 
 SudokuGrid.prototype.setAssignedAsGiven = function setAssignedAsGiven() {
-	let i, j;
+	let i;
+	let j;
 	for (i = 0; i < GRID_SIZE; i++) {
 		for (j = 0; j < GRID_SIZE; j++) {
 			const c = this.cells[i][j];

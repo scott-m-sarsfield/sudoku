@@ -1,12 +1,11 @@
-/* jshint esversion:6 */
+/* eslint-disable unicorn/filename-case */
 
-var React = require('react');
-var ReactDOMServer = require('react-dom/server');
-
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
 import Main from './src/components/Main';
 
-let main = React.createElement(Main);
+const main = React.createElement(Main);
 
 export default {
-    content: ReactDOMServer.renderToString(main)
+	content: ReactDOMServer.renderToString(main)
 };

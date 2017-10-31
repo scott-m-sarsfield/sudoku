@@ -1,23 +1,19 @@
-/* jshint esversion:6 */
+/* global document */
+import React from 'react'; // eslint-disable-line no-unused-vars
+import ReactDOM from 'react-dom';
+import $ from 'jquery';
 
-const React = require('react');
-const ReactDOM = require('react-dom');
-const $ = require('jquery');
-
-// Tap plugin
-const injectTapEventPlugin = require('react-tap-event-plugin');
+import injectTapEventPlugin from 'react-tap-event-plugin';
+import Main from './components/Main';
 
 injectTapEventPlugin({
 	shouldRejectClick(lastTouchEventTimestamp, clickEventTimestamp) {
-		const time_diff = clickEventTimestamp - lastTouchEventTimestamp;
-		console.log(time_diff);
-		if (time_diff < 750) {
+		const timeDiff = clickEventTimestamp - lastTouchEventTimestamp;
+		if (timeDiff < 750) {
 			return true;
 		}
 	}
 });
-
-import Main from './components/Main';
 
 $(document).ready(() => {
 	ReactDOM.render(<Main />, document.getElementById('content'));

@@ -1,139 +1,115 @@
-/* jshint esversion:6 */
-
-var React = require('react');
-import assign from 'object-assign';
+/* eslint-disable unicorn/filename-case */
+/* global window, localStorage */
+import React from 'react';
 import SudokuGrid from '../model/SudokuGrid';
 import SudokuSolver from '../model/SudokuSolver';
 import SudokuGenerator from '../model/SudokuGenerator';
 
-//import SudokuInputGrid from './SudokuInputGrid';
-//import SolvedSudokuGrid from './SolvedSudokuGrid';
 import SudokuGameGrid from './SudokuGameGrid';
 import SudokuKeyListener from './SudokuKeyListener';
 
 import BezierMenu from './BezierMenu';
 
-import $ from 'jquery';
-
-const NROWS = 9;
-const NCOLS = 9;
-
-const styles = {
-    table:{
-        borderCollapse:'collapse',
-        border:'solid 5px'
-    },
-    cell:{
-        border:'solid 1px'
-    },
-    cellInput:{
-        border:'none',
-        width:'1em',
-        padding:'0.5em',
-        textAlign:'center'
-    },
-    cellDiv:{
-        width:'1em',
-        height:'1em',
-        padding:'0.5em',
-        textAlign:'center'
-    }
-};
-
-let _generator = new SudokuGenerator();
+const _generator = new SudokuGenerator();
 let _generatedPuzzle = new SudokuGrid();
-try{
-    window.mypuzzle = _generatedPuzzle;
-}catch(e){}
+try {
+	window.mypuzzle = _generatedPuzzle;
+} catch (err) { /* nothing */ }
 
-function loadGame(){
-    try{
-        let saved_data = localStorage.getItem('game_in_progress');
-        if(saved_data){
-            _generatedPuzzle.setCells(
-                JSON.parse( saved_data ).cells || null
+const GRID_SIZE = 9;
+
+function loadGame() {
+	try {
+		const savedData = localStorage.getItem('game_in_progress');
+		if (savedData) {
+			_generatedPuzzle.setCells(
+                JSON.parse(savedData).cells || null
             );
-            getClearedAndSolvedGrids();
-        }
-        else{
-            newGame();
-            saveGame();
-        }
-    }catch(e){
-
-    }
+			getClearedAndSolvedGrids();
+		} else {
+			newGame();
+			saveGame();
+		}
+	} catch (err) {
+        /* Nothing */
+	}
 }
 
-function saveGame(){
-    try{
-        localStorage.setItem('game_in_progress',JSON.stringify(_generatedPuzzle));
-    }catch(e){
-
-    }
+function saveGame() {
+	try {
+		localStorage.setItem('game_in_progress', JSON.stringify(_generatedPuzzle));
+	} catch (err) {
+        /* Nothing */
+	}
 }
 
-function newGame(n){
-    n = n || 45;
-    _generatedPuzzle = _generator.generate(n);
-    _generatedPuzzle.initializeToGivens();
+function newGame(n) {
+	n = n || 45;
+	_generatedPuzzle = _generator.generate(n);
+	_generatedPuzzle.initializeToGivens();
 
-    getClearedAndSolvedGrids();
+	getClearedAndSolvedGrids();
 }
 
-
-let unsolvedGrid, solvedGrid;
-function getClearedAndSolvedGrids(){
-    unsolvedGrid = _generatedPuzzle.getUnsolvedGrid();
-    solvedGrid = (new SudokuSolver(unsolvedGrid)).solve();
+let unsolvedGrid;
+let solvedGrid;
+function getClearedAndSolvedGrids() {
+	unsolvedGrid = _generatedPuzzle.getUnsolvedGrid();
+	solvedGrid = (new SudokuSolver(unsolvedGrid)).solve();
 }
 
-let solutionMessage = "";
+let solutionMessage = '';
 
-function checkSolution(ev){
+function checkSolution() {
+	function flatten(a, b) {
+		return a.concat(b);
+	}
 
-    function flatten(a,b){ return a.concat(b);}
+	const userSolution = _generatedPuzzle.toMatrix().reduce(flatten, []);
+	const actualSolution = solvedGrid.toMatrix().reduce(flatten, []);
 
-    let userSolution = _generatedPuzzle.toMatrix().reduce(flatten,[]);
-    let actualSolution = solvedGrid.toMatrix().reduce(flatten,[]);
+	let i;
+	const l = userSolution.length;
+	let nCorrect = 0;
+	let nWrong = 0;
+	for (i = 0; i < l; i++) {
+		if (userSolution[i]) {
+			if (userSolution[i] === actualSolution[i]) {
+				nCorrect++;
+			}	else {
+				nWrong++;
+			}
+		}
+	}
 
-    let i, l = userSolution.length, nCorrect = 0, nWrong = 0;
-    for(i=0;i<l;i++){
-        if(userSolution[i]){
-            if(userSolution[i]==actualSolution[i]) nCorrect++;
-            else nWrong++;
-        }
-    }
-
-    try{
-        if(nWrong > 0){
-             solutionMessage = "You have a few incorrect.";
-        }else if(nCorrect == 81){
-             solutionMessage = "Congratulations! You solved this puzzle!";
-        }else{
-             solutionMessage = "You're good so far...";
-        }
-    }catch(e){}
-
+	try {
+		if (nWrong > 0) {
+			solutionMessage = 'You have a few incorrect.';
+		} else if (nCorrect === 81) {
+			solutionMessage = 'Congratulations! You solved this puzzle!';
+		} else {
+			solutionMessage = 'You\'re good so far...';
+		}
+	} catch (err) { /* nothing */ }
 }
-
 
 loadGame();
 
-function matrix(nr,nc,def){
-    let ret = [];
-    let i,j;
-    for(i=0;i<nr;i++){
-        ret[i] = [];
-        for(j=0;j<nc;j++){
-            ret[i][j] = def;
-        }
-    }
-    return ret;
+function matrix(nr, nc, def) {
+	const ret = [];
+	let i;
+	let j;
+	for (i = 0; i < nr; i++) {
+		ret[i] = [];
+		for (j = 0; j < nc; j++) {
+			ret[i][j] = def;
+		}
+	}
+	return ret;
 }
 
-
-let highlighted_cell_index = -1;
-let note_mode = false;
+let highlightedCellIndex = -1;
+let noteMode = false;
 
 const MENU_CLOSED = -1;
 const MENU_MAIN = 0;
@@ -141,77 +117,68 @@ const MENU_NEWGAME = 1;
 const MENU_HOWTOPLAY = 2;
 const MENU_CREDITS = 3;
 
-let current_menu = MENU_CLOSED;
+let currentMenu = MENU_CLOSED;
 
-function getStateFromStores(){
+function getStateFromStores() {
+	return {
+		sGrid: _generatedPuzzle,
+		highlightedCellIndex,
+		noteMode,
+		solutionMessage,
 
-    return {
-        s_grid:_generatedPuzzle,
-        highlighted_cell_index: highlighted_cell_index,
-        note_mode:note_mode,
-        solution_message: solutionMessage,
+		highlightedCellCol: highlightedCellIndex % 9,
+		highlightedCellRow: Math.floor(highlightedCellIndex / 9),
 
-        highlighted_cell_col: highlighted_cell_index % 9,
-        highlighted_cell_row: Math.floor(highlighted_cell_index / 9),
-
-        current_menu: current_menu
-    };
+		currentMenu
+	};
 }
 
-function setCurrentMenu(m){
-    current_menu = m;
+function setCurrentMenu(m) {
+	currentMenu = m;
 }
 
 //------------------------------------------------------------------------------
 
-let DeviceHeight = 600, DeviceWidth = 600;
-try{
-    DeviceHeight = window.innerHeight;
-    DeviceWidth = window.innerWidth;
-}catch(e){
+let DeviceHeight = 600;
+let DeviceWidth = 600;
+try {
+	DeviceHeight = window.innerHeight;
+	DeviceWidth = window.innerWidth;
+} catch (err) {
+    /* Nothing */
 }
 
-
-
-function max(a,b){
-    return (a > b) ? a : b;
-}
-function min(a,b){
-    return (a > b) ? b : a;
+function calcTextSize(h, w) {
+	if (w < h - 342) {
+		return (w - 26) / 20;
+	}
+	return (h - 342) / 19;
 }
 
-function calcTextSize(h,w){
-    if(w < h - 342){
-        return (w - 26) / 20;
-    }else{
-        return (h - 342) / 19;
-    }
-}
-
-let SudokuTextSize = calcTextSize(DeviceHeight,DeviceWidth);
-
+let SudokuTextSize = calcTextSize(DeviceHeight, DeviceWidth);
 
 //------------------------------------------------------------------------------
 
-class ButtonPanel extends React.Component{
-    constructor(props){
-        super(props);
-        this.isActiveOption = this.isActiveOption.bind(this);
-        this.getButtonClass = this.getButtonClass.bind(this);
-    }
+class ButtonPanel extends React.Component {
+	constructor(props) {
+		super(props);
+		this.isActiveOption = this.isActiveOption.bind(this);
+		this.getButtonClass = this.getButtonClass.bind(this);
+	}
 
-    isActiveOption(option){
-        return this.props.activeButtons.join("").indexOf( String(option) ) >= 0;
-    }
+	isActiveOption(option) {
+		return this.props.activeButtons.join('').indexOf(String(option)) >= 0;
+	}
 
-    getButtonClass(option){
-        return this.isActiveOption(option) ? "on" : "off";
-    }
+	getButtonClass(option) {
+		return this.isActiveOption(option) ? 'on' : 'off';
+	}
 
-    render(){
-        let buttons = [],i;
-        for(i = 1; i<= 9; i++){
-            buttons.push(
+	render() {
+		const buttons = [];
+		let i;
+		for (i = 1; i <= 9; i++) {
+			buttons.push(
                 <button
                     className={this.getButtonClass(i)}
                     key={i}
@@ -220,226 +187,222 @@ class ButtonPanel extends React.Component{
                     {i}
                 </button>
             );
-        }
+		}
 
-        let clear_button = (<button className="clear" key={"clear"} onTouchTap={this.props.onClear}>Clear</button>);
+		const clearButton = (<button className="clear" key={'clear'} onTouchTap={this.props.onClear}>Clear</button>);
 
-        return (
+		return (
             <div className="button-panel">
                 <div className="clear-button-container">
-                    {clear_button}
+                    {clearButton}
                 </div>
-                <div className="option-buttons-container" onTouchTap={(e)=>{
-                    //;
-                    console.log(e.target.dataset.value);
-                    this.props.onNumberSelect(e.target.dataset.value);
-                }}>
+                <div className="option-buttons-container" onTouchTap={e => {
+                    // ;
+	console.log(e.target.dataset.value);
+	this.props.onNumberSelect(e.target.dataset.value);
+}}>
                     {buttons}
                 </div>
             </div>
-        );
-    }
+		);
+	}
 }
 
 //------------------------------------------------------------------------------
 
-class Main extends React.Component{
+class Main extends React.Component {
 
-    constructor(props,context){
-        super(props,context);
+	constructor(props, context) {
+		super(props, context);
 
-        this.state = getStateFromStores();
+		this.state = getStateFromStores();
 
-        this._onChange = this._onChange.bind(this);
-        this.handleClear = this.handleClear.bind(this);
-        this.handleNumberInputCell = this.handleNumberInputCell.bind(this);
-        this.handleClearCell = this.handleClearCell.bind(this);
-        this.handleSelectCell = this.handleSelectCell.bind(this);
-        this.handleToggleNoteMode = this.handleToggleNoteMode.bind(this);
-        this.handleWindowResize = this.handleWindowResize.bind(this);
-        this.handleSetNoteMode = this.handleSetNoteMode.bind(this);
-    }
+		this._onChange = this._onChange.bind(this);
+		this.handleClear = this.handleClear.bind(this);
+		this.handleNumberInputCell = this.handleNumberInputCell.bind(this);
+		this.handleClearCell = this.handleClearCell.bind(this);
+		this.handleSelectCell = this.handleSelectCell.bind(this);
+		this.handleToggleNoteMode = this.handleToggleNoteMode.bind(this);
+		this.handleWindowResize = this.handleWindowResize.bind(this);
+		this.handleSetNoteMode = this.handleSetNoteMode.bind(this);
+	}
 
-    componentDidMount(){
-        try{
-            window.addEventListener('resize',this.handleWindowResize);
-        }catch(e){
+	componentDidMount() {
+		try {
+			window.addEventListener('resize', this.handleWindowResize);
+		} catch (err) {
+            /* Nothing */
+		}
+	}
 
-        }
-    }
+	componentWillUnmount() {
+		try {
+			window.removeEventListener('resize', this.handleWindowResize);
+		} catch (err) { /* nothing */ }
+	}
 
-    componentWillUnmount(){
-        try{
-            window.removeEventListener('resize',this.handleWindowResize);
-        }catch(e){}
-    }
+	_onChange() {
+		this.setState(getStateFromStores());
+	}
 
-    _onChange(){
-        this.setState(getStateFromStores());
-    }
+	handleWindowResize() {
+		SudokuTextSize = calcTextSize(window.innerHeight, window.innerWidth);
+        // Console.log("resized");
+		this.setState({});
+	}
 
-    handleWindowResize(){
-        SudokuTextSize = calcTextSize(window.innerHeight,window.innerWidth);
-        //console.log("resized");
-        this.setState({});
-    }
+	handleChange(e) {
+        // Console.log(e.target.value);
 
-    handleChange(e){
-        //console.log(e.target.value);
+		const elm = e.target;
 
-        let elm = e.target;
+		let x = elm.dataset.x;
+		let y = elm.dataset.y;
+		const v = elm.value;
 
-        let x = elm.dataset.x,
-            y = elm.dataset.y,
-            v = elm.value;
+		console.log('Changed (' + x + ',' + y + ') to "' + v + '"');
 
-        console.log("Changed ("+x+","+y+") to \""+v+"\"");
+		let n = '';
+		try {
+			x = parseInt(x, 10);
+			y = parseInt(y, 10);
+			n = parseInt(v, 10);
+		} catch (err) {
+			n = '';
+		}
 
-        let n = "";
-        try{
-            x = parseInt(x);
-            y = parseInt(y);
-            n = parseInt(v);
-        }catch(error){
-            n = "";
-        }
+		unsolvedGrid.set(x + 1, y + 1, n);
 
-        unsolved.set(x+1,y+1,n);
+		localStorage.setItem('cells', JSON.stringify(unsolvedGrid.cells));
 
-        localStorage.setItem("cells",JSON.stringify(unsolved.cells));
+		this._onChange();
+	}
 
-        this._onChange();
-    }
-
-    handleClear(){
-        let mat = matrix(GRID_SIZE,GRID_SIZE,null);
-        console.log(mat);
-        unsolved.setCells(
+	handleClear() {
+		const mat = matrix(GRID_SIZE, GRID_SIZE, null);
+		console.log(mat);
+		unsolvedGrid.setCells(
             mat
         );
-        this._onChange();
-    }
+		this._onChange();
+	}
 
-    handleNumberInputCell(val){
-        if(this.state.highlighted_cell_index < 0) return;
+	handleNumberInputCell(val) {
+		if (this.state.highlightedCellIndex < 0) {
+			return;
+		}
 
-        let col = this.state.highlighted_cell_col;
-        let row = this.state.highlighted_cell_row;
+		const col = this.state.highlightedCellCol;
+		const row = this.state.highlightedCellRow;
 
-        if(_generatedPuzzle.isGiven(col+1,row+1)) return; // can't set given cell.
+		if (_generatedPuzzle.isGiven(col + 1, row + 1)) {
+			return;
+		} // Can't set given cell.
 
-        if(this.state.note_mode){
-            let cell = _generatedPuzzle.cells[row][col];
-            cell.toggleOption(val);
-        }else{
-            //set value
-            if(_generatedPuzzle.get(col+1,row+1) == val) val = null;
-            _generatedPuzzle.set(col+1,row+1,val);
-        }
+		if (this.state.noteMode) {
+			const cell = _generatedPuzzle.cells[row][col];
+			cell.toggleOption(val);
+		} else {
+            // Set value
+			if (_generatedPuzzle.get(col + 1, row + 1) === val) {
+				val = null;
+			}
+			_generatedPuzzle.set(col + 1, row + 1, val);
+		}
 
-        saveGame();
+		saveGame();
 
-        this._onChange();
-    }
+		this._onChange();
+	}
 
-    handleClearCell(e){
-        //;
-        let col = this.state.highlighted_cell_col;
-        let row = this.state.highlighted_cell_row;
+	handleClearCell() {
+        // ;
+		const col = this.state.highlightedCellCol;
+		const row = this.state.highlightedCellRow;
 
-        if(_generatedPuzzle.isGiven(col+1,row+1)) return; // can't delete given cell.
+		if (_generatedPuzzle.isGiven(col + 1, row + 1)) {
+			return;
+		} // Can't delete given cell.
 
-        if(this.state.note_mode){
-            let cell = _generatedPuzzle.cells[row][col];
-            cell.clearOptions();
-        }else{
-            _generatedPuzzle.set(col+1,row+1,null);
-        }
+		if (this.state.noteMode) {
+			const cell = _generatedPuzzle.cells[row][col];
+			cell.clearOptions();
+		} else {
+			_generatedPuzzle.set(col + 1, row + 1, null);
+		}
 
-        saveGame();
+		saveGame();
 
-        this._onChange();
-    }
+		this._onChange();
+	}
 
-    handleSelectCell(index){
-        highlighted_cell_index = index;
-        this._onChange();
-    }
+	handleSelectCell(index) {
+		highlightedCellIndex = index;
+		this._onChange();
+	}
 
-    handleToggleNoteMode(e){
-        //;
-        note_mode = !note_mode;
-        this._onChange();
-    }
+	handleToggleNoteMode() {
+		noteMode = !noteMode;
+		this._onChange();
+	}
 
-    handleSetNoteMode(on){
-        note_mode = on;
-        this._onChange();
-    }
+	handleSetNoteMode(on) {
+		noteMode = on;
+		this._onChange();
+	}
 
-    handleStartNewGame(v){
-        newGame(v);
-        saveGame();
-        setCurrentMenu(MENU_CLOSED);
-        this._onChange();
-    }
-    handleChangeMenu(menu){
-        setCurrentMenu(menu);
-        this._onChange();
-    }
+	handleStartNewGame(v) {
+		newGame(v);
+		saveGame();
+		setCurrentMenu(MENU_CLOSED);
+		this._onChange();
+	}
+	handleChangeMenu(menu) {
+		setCurrentMenu(menu);
+		this._onChange();
+	}
 
-    render(){
+	render() {
+		let _cellOptions = [];
+		const _currentIndex = this.state.highlightedCellIndex;
+		let _cellValue = null;
+		if (_currentIndex >= 0) {
+			const _cell = this.state.sGrid.getCellByIndex(_currentIndex);
+			_cellValue = _cell.value;
+			_cellOptions = _cell.notes.options;
+		}
 
-        const GRID_SIZE = 9;
+		const gridStyles = {
+			display: 'inline-block',
+			padding: '0',
+			paddingTop: (this.state.solutionMessage) ? '0' : '1em',
+			fontSize: SudokuTextSize + 'px'
+		};
 
-        let _cellOptions = [];
-        let _currentIndex = this.state.highlighted_cell_index;
-        let _cellValue = null;
-        if(_currentIndex >= 0){
-            let _cell = this.state.s_grid.getCellByIndex(_currentIndex);
-            _cellValue = _cell.value;
-            _cellOptions = _cell.notes.options;
-        }
-
-        let gridStyles = {
-            display:'inline-block',
-            padding:'0',
-            paddingTop: (this.state.solution_message) ? '0' : '1em',
-            fontSize:SudokuTextSize+'px'
-        };
-
-        let note_mode_button = (
-            <button onTouchTap={this.handleToggleNoteMode}>
-                {"Note Mode: "+(note_mode ? "ON" : "OFF")}
-            </button>
-        );
-        let new_game_button = (
-            <button id={"new-game-button"} onTouchTap={this.handleChangeMenu.bind(this,MENU_MAIN)}>
-                {"Menu"}
-            </button>
-        );
-
-        let check_solution_button = (
-            <button onTouchTap={(e)=>{
-                ////;
-                checkSolution(e);
-                this._onChange();
-            }}>
-                {"Check Solution"}
+		const newGameButton = (
+            <button id={'new-game-button'} onTouchTap={this.handleChangeMenu.bind(this, MENU_MAIN)}>
+                {'Menu'}
             </button>
         );
 
-        let button_inputs = (
-            <div id="control-panel" className={(this.state.note_mode ? "note-mode" : "value-mode")}>
+		const checkSolutionButton = (
+            <button onTouchTap={e => {
+	checkSolution(e);
+	this._onChange();
+}}>
+                {'Check Solution'}
+            </button>
+        );
+
+		const buttonInputs = (
+            <div id="control-panel" className={(this.state.noteMode ? 'note-mode' : 'value-mode')}>
                 <div className="mode-selection">
-                    <button className="values" onTouchTap={this.handleSetNoteMode.bind(this,false)}>Values</button>
-                    <button className="notes" onTouchTap={this.handleSetNoteMode.bind(this,true)}>Notes</button>
-
-                    {/*note_mode_button*/}
+                    <button className="values" onTouchTap={this.handleSetNoteMode.bind(this, false)}>Values</button>
+                    <button className="notes" onTouchTap={this.handleSetNoteMode.bind(this, true)}>Notes</button>
                 </div>
                 <div>
                     <ButtonPanel
-                        activeButtons={this.state.note_mode ? _cellOptions : [_cellValue]}
+                        activeButtons={this.state.noteMode ? _cellOptions : [_cellValue]}
                         onNumberSelect={this.handleNumberInputCell}
                         onClear={this.handleClearCell}
                         />
@@ -447,115 +410,121 @@ class Main extends React.Component{
             </div>
         );
 
-        let main_menu = (
+		const mainMenu = (
             <div>
-                <div style={{textAlign:'center'}}>Menu</div>
+                <div style={{textAlign: 'center'}}>Menu</div>
                 <ul>
-                    <li><button onTouchTap={this.handleChangeMenu.bind(this,MENU_NEWGAME)}>New Game</button></li>
-                    <li><button onTouchTap={()=>{window.location = "./scan";}}>Scan-In Game</button></li>
-                    <li><button onTouchTap={this.handleChangeMenu.bind(this,MENU_HOWTOPLAY)}>How To Play</button></li>
-                    <li><button onTouchTap={this.handleChangeMenu.bind(this,MENU_CREDITS)}>Credits</button></li>
-                    <li><button onTouchTap={this.handleChangeMenu.bind(this,MENU_CLOSED)}>Exit</button></li>
+                    <li><button onTouchTap={this.handleChangeMenu.bind(this, MENU_NEWGAME)}>New Game</button></li>
+                    <li><button onTouchTap={() => {
+	window.location = './scan';
+}}>Scan-In Game</button></li>
+                    <li><button onTouchTap={this.handleChangeMenu.bind(this, MENU_HOWTOPLAY)}>How To Play</button></li>
+                    <li><button onTouchTap={this.handleChangeMenu.bind(this, MENU_CREDITS)}>Credits</button></li>
+                    <li><button onTouchTap={this.handleChangeMenu.bind(this, MENU_CLOSED)}>Exit</button></li>
                   </ul>
             </div>
         );
 
-        let new_game_menu = (
+		const newGameMenu = (
             <div>
-                <div style={{textAlign:'center'}}>New Game</div>
+                <div style={{textAlign: 'center'}}>New Game</div>
                 <ul>
-                    <li><button onTouchTap={this.handleStartNewGame.bind(this,40)}>Easy</button></li>
-                    <li><button onTouchTap={this.handleStartNewGame.bind(this,35)}>Medium</button></li>
-                    <li><button onTouchTap={this.handleStartNewGame.bind(this,30)}>Hard</button></li>
-                    <li><button onTouchTap={this.handleStartNewGame.bind(this,25)}>Evil</button></li>
+                    <li><button onTouchTap={this.handleStartNewGame.bind(this, 40)}>Easy</button></li>
+                    <li><button onTouchTap={this.handleStartNewGame.bind(this, 35)}>Medium</button></li>
+                    <li><button onTouchTap={this.handleStartNewGame.bind(this, 30)}>Hard</button></li>
+                    <li><button onTouchTap={this.handleStartNewGame.bind(this, 25)}>Evil</button></li>
                     <br />
-                    <li><button onTouchTap={this.handleChangeMenu.bind(this,MENU_MAIN)}>Back</button></li>
+                    <li><button onTouchTap={this.handleChangeMenu.bind(this, MENU_MAIN)}>Back</button></li>
                   </ul>
             </div>
         );
 
-        let howto_menu = (
+		const howToMenu = (
             <div>
-                <div style={{textAlign:'center'}}>How To Play</div>
+                <div style={{textAlign: 'center'}}>How To Play</div>
                 <ul>
                     <li>(Ask Google.  I'll add this later.)</li>
                     <br />
-                    <li><button onTouchTap={this.handleChangeMenu.bind(this,MENU_MAIN)}>Back</button></li>
+                    <li><button onTouchTap={this.handleChangeMenu.bind(this, MENU_MAIN)}>Back</button></li>
                   </ul>
             </div>
         );
 
-        let credits_menu = (
+		const creditsMenu = (
             <div>
-                <div style={{textAlign:'center'}}>Credits</div>
+                <div style={{textAlign: 'center'}}>Credits</div>
                 <ul>
                     <li>Copyright 2016 -- Scott Sarsfield</li>
-                    <li><a href="http://scottmsarsfield.com" style={{textDecoration:'none'}}>scottmsarsfield.com</a></li>
+                    <li><a href="http://scottmsarsfield.com" style={{textDecoration: 'none'}}>scottmsarsfield.com</a></li>
                     <br />
-                    <li><button onTouchTap={this.handleChangeMenu.bind(this,MENU_MAIN)}>Back</button></li>
+                    <li><button onTouchTap={this.handleChangeMenu.bind(this, MENU_MAIN)}>Back</button></li>
                   </ul>
             </div>
         );
 
-        let _themenu;
-        switch(this.state.current_menu){
-            case MENU_MAIN:
-                _themenu = main_menu;
-                break;
-            case MENU_NEWGAME:
-                _themenu = new_game_menu;
-                break;
-            case MENU_HOWTOPLAY:
-                _themenu = howto_menu;
-                break;
-            case MENU_CREDITS:
-                _themenu = credits_menu;
-                break;
+		let _themenu;
+		switch (this.state.currentMenu) {
+			case MENU_MAIN:
+				_themenu = mainMenu;
+				break;
+			case MENU_NEWGAME:
+				_themenu = newGameMenu;
+				break;
+			case MENU_HOWTOPLAY:
+				_themenu = howToMenu;
+				break;
+			case MENU_CREDITS:
+				_themenu = creditsMenu;
+				break;
 
-            default:
-                _themenu = main_menu;
-                break;
-        }
+			default:
+				_themenu = mainMenu;
+				break;
+		}
 
-
-        return (
+		return (
             <div>
-                <BezierMenu show={this.state.current_menu != -1} onClose={()=>{setCurrentMenu(MENU_CLOSED); this._onChange();}}>
+                <BezierMenu show={this.state.currentMenu !== -1} onClose={this.handleCloseMenu.bind(this)}>
                     {_themenu}
                 </BezierMenu>
                 <div className="game-header">
-                    {new_game_button}
+                    {newGameButton}
                     Sudoku
                 </div>
 
-                {/*new_game_button*/}
+                {/* newGameButton */}
                 <div id="check-solution-panel">
-                    <div className="button">{check_solution_button}</div>
-                    <div className="result" style={{display:(this.state.solution_message)?"block":"none"}}>
-                        {this.state.solution_message}
+                    <div className="button">{checkSolutionButton}</div>
+                    <div className="result" style={{display: (this.state.solutionMessage) ? 'block' : 'none'}}>
+                        {this.state.solutionMessage}
                     </div>
                 </div>
 
-                <div style={{textAlign:'center'}}>
+                <div style={{textAlign: 'center'}}>
                     <div style={gridStyles}>
                         <SudokuKeyListener
-                            highlighted_cell_index={this.state.highlighted_cell_index}
+                            highlightedCellIndex={this.state.highlightedCellIndex}
                             onClearCell={this.handleClearCell}
                             onSelectCell={this.handleSelectCell}
                             onNumberInput={this.handleNumberInputCell}
                             onSpaceBar={this.handleToggleNoteMode}/>
 
                         <SudokuGameGrid
-                            grid={this.state.s_grid}
+                            grid={this.state.sGrid}
                             onSelectCell={this.handleSelectCell}
-                            highlightClass={(this.state.note_mode)? "option_highlight" : "value_highlight"}
-                            highlighted_cell_index={this.state.highlighted_cell_index}/>
+                            highlightClass={(this.state.noteMode) ? 'option_highlight' : 'value_highlight'}
+                            highlightedCellIndex={this.state.highlightedCellIndex}/>
                     </div>
                 </div>
-                {button_inputs}
+                {buttonInputs}
             </div>
-        );
-    }
+		);
+	}
+
+	handleCloseMenu() {
+		setCurrentMenu(MENU_CLOSED);
+		this._onChange();
+	}
 }
 
 export default Main;
