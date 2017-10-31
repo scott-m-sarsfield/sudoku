@@ -30,6 +30,7 @@
     "reactify": "*",
     "vinyl-buffer": "*",
     "vinyl-source-stream": "*",
+    "xo": "^0.18.2",
     "yargs": "^5.0.0"
   },
   "dependencies": {
