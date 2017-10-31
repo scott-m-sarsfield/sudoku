@@ -1,4 +1,4 @@
-/* eslint-disable func-names, one-var, unicorn/filename-case, no-throw-literal */
+/* eslint-disable func-names, unicorn/filename-case, no-throw-literal */
 /* global window */
 
 import SudokuGrid from './SudokuGrid';
@@ -46,18 +46,11 @@ SudokuSolver.prototype.resetGridToGivens = function resetGridToGivens() {
 SudokuSolver.prototype.loadFromSolveHistory = function loadFromSolveHistory(index) {
 	const _cells = this.grid.cells.reduce((a, b) => a.concat(b), []);
 
-    // Console.log("reverting to step",index);
-
-    // console.log(_cells.map((v)=>v.value));
-
 	this.solveHistory = this.solveHistory.slice(0, index);
 	for (let i = 0; i < index; i++) {
 		const entry = this.solveHistory[i];
-        // Console.log("ENTRY",_cells[entry.id],entry.value);
 		_cells[entry.id].value = entry.value;
 	}
-
-    // Console.log(_cells.map((v)=>v.value));
 };
 
 SudokuSolver.prototype.solveCell = function solveCell(cell, value, note) {
@@ -75,8 +68,8 @@ SudokuSolver.prototype.solveCell = function solveCell(cell, value, note) {
 };
 
 SudokuSolver.prototype.propagateKnowledge = function propagateKnowledge(cell) {
-	const rowNumber = Math.floor(cell.id / GRID_SIZE),
-		colNumber = cell.id % GRID_SIZE;
+	const rowNumber = Math.floor(cell.id / GRID_SIZE);
+	const colNumber = cell.id % GRID_SIZE;
 	const boxNumber = (Math.floor(rowNumber / 3) * 3) + Math.floor(colNumber / 3);
 
     // Make sure related entities get updated.
@@ -111,10 +104,10 @@ function getOptionsForCell(grid, row, col) {
 			row: Math.floor(row / 3),
 			col: Math.floor(col / 3)
 		};
-        // Console.log(subgrid);
-		const si = (subgrid.row * 3) + (Math.floor(i / 3)),
-			sj = (subgrid.col * 3) + (i % 3);
-        // Console.log(si,sj);
+
+		const si = (subgrid.row * 3) + (Math.floor(i / 3));
+		const sj = (subgrid.col * 3) + (i % 3);
+
 		v = grid.cells[si][sj].value;
 		if (v) {
 			options[v - 1] = false;
@@ -130,8 +123,6 @@ function getOptionsForCell(grid, row, col) {
 	return opts;
 }
 
-window.getOptionsForCell = getOptionsForCell;
-
 SudokuSolver.prototype.getRow = function getRow(i) {
 	return this.grid.cells[i];
 };
@@ -141,8 +132,8 @@ SudokuSolver.prototype.getCol = function getCol(i) {
 };
 
 SudokuSolver.prototype.getBox = function getBox(i) {
-	const sr = Math.floor(i / 3),
-		sc = i % 3;
+	const sr = Math.floor(i / 3);
+	const sc = i % 3;
 	return this.grid.cells.slice(sr * 3, (sr + 1) * 3).map(v => v.slice(sc * 3, (sc + 1) * 3)).reduce((a, b) => {
 		return a.concat(b);
 	}, []);
@@ -192,8 +183,8 @@ SudokuSolver.prototype.basicTechnique = function basicTechnique(arr) {
 		}
 
         // Console.log(cell.id);
-		const r = Math.floor(cell.id / GRID_SIZE),
-			c = cell.id % GRID_SIZE;
+		const r = Math.floor(cell.id / GRID_SIZE);
+		const c = cell.id % GRID_SIZE;
 
 		const opts = getOptionsForCell(this.grid, r, c);
 
@@ -224,8 +215,8 @@ SudokuSolver.prototype.excludeOptionsFromCells = function excludeOptionsFromCell
 
 SudokuSolver.prototype.twinHunt = function twinHunt(arr) {
 	const optionsRef = {};
-	let i,
-		l = arr.length;
+	let i;
+	let l = arr.length;
 	for (i = 0; i < l; i++) {
 		if (arr[i].value) {
 			continue;
@@ -240,12 +231,11 @@ SudokuSolver.prototype.twinHunt = function twinHunt(arr) {
 	const o = Object.keys(optionsRef);
 	l = o.length;
 
-	let otherCells, excludedVals;
+	let otherCells;
+	let excludedVals;
 	for (i = 0; i < o.length; i++) {
         // Twin Scenario
 		if (o[i].length === 2 && optionsRef[o[i]].length > 1) {
-            // Console.log("TWINS",optionsRef[ o[i] ]);
-
 			otherCells = inXNotInY(arr, optionsRef[o[i]]);
 			excludedVals = optionsRef[o[i]][0].notes.options;
 
@@ -257,7 +247,6 @@ SudokuSolver.prototype.twinHunt = function twinHunt(arr) {
 		if (o[i].length === 3) {
 			const s = o[i];
 			triplets = [].concat(optionsRef[s]);
-            // Console.log("POSTINIT",tripletCount,triplets);
 
 			const subsets = [
 				s[0] + s[1],
@@ -271,13 +260,10 @@ SudokuSolver.prototype.twinHunt = function twinHunt(arr) {
 				const refs = optionsRef[subsets[ii]];
 				if (refs) {
 					triplets = triplets.concat(refs);
-                    // Console.log(subsets,optionsRef);
-                    // console.log("Subset of",o[i],"=",subsets[ii],"--",refs);
 				}
 			}
 
 			if (triplets.length >= 3) {
-                // Console.log("TRIPLETS",o[i],triplets);
 				otherCells = inXNotInY(arr, triplets);
 				excludedVals = optionsRef[o[i]][0].notes.options;
 				this.excludeOptionsFromCells(otherCells, excludedVals, 'TRIPLETS');
@@ -301,10 +287,10 @@ SudokuSolver.prototype.evalEntity = function evalEntity(arr) {
 };
 
 SudokuSolver.prototype.getRefLookup = function getRefLookup(arr) {
-	let i,
-		l = GRID_SIZE;
-	const refs = [],
-		safe = [];
+	let i;
+	let l = GRID_SIZE;
+	const refs = [];
+	const safe = [];
 
 	for (i = 0; i < l; i++) {
 		refs[i] = [];
@@ -344,7 +330,6 @@ SudokuSolver.prototype.loneRanger = function loneRanger(arr) {
 	const l = GRID_SIZE;
 	for (i = 0; i < l; i++) {
 		if (refs[i].length === 1) {
-            // Console.log(refs);
 			if (refs[i][0].value) {
 				if (refs[i][0].value !== i + 1) {
 					throw 'already assigned a different value';
@@ -352,10 +337,7 @@ SudokuSolver.prototype.loneRanger = function loneRanger(arr) {
 
 				continue; // Don't bother solving it again...
 			}
-            // Throw "help";
 			this.solveCell(refs[i][0], i + 1, 'LONERANGER');
-            // Console.log("LONERANGER",refs[i][0],i+1);
-            // refs[i][0].value = i+1;
 			valueSet = true;
 		}
 	}
@@ -370,10 +352,8 @@ SudokuSolver.prototype.determinePivotPoint = function determinePivotPoint() {
 
 	const _cells = this.grid.cells.reduce((a, b) => a.concat(b), []).filter(v => !v.value);
 
-    // Console.log(_cells.map((v)=>v.value));
-
-	let i,
-		l = this.grid.cells.length;
+	let i;
+	let	l = this.grid.cells.length;
 
 	for (i = 0; i < l; i++) {
 		const cell = _cells[i];
@@ -395,9 +375,7 @@ SudokuSolver.prototype.determinePivotPoint = function determinePivotPoint() {
 
 SudokuSolver.prototype.solveDeterministic = function solveDeterministic() {
     // Add all rows to be evaluated.
-	let i;
-	const l = GRID_SIZE;
-	for (i = 0; i < l; i++) {
+	for (let i = 0; i < GRID_SIZE; i++) {
 		this.entityQueue.enqueue({type: ENT_ROW, number: i});
 	}
 
@@ -437,13 +415,6 @@ const ACTION_BREAK = 2;
 const ACTION_DEADEND = 3;
 
 SudokuSolver.prototype.__onSolve = function __onSolve(onSolution) {
-    /* Let solvesById = this.solveHistory.reduce((a,b)=>{
-        if(!a[b.id]) a[b.id] = [];
-        a[b.id].push(b);
-        return a;
-    },{});
-    console.log(solvesById); */
-
 	return onSolution();
 };
 
@@ -457,7 +428,6 @@ SudokuSolver.prototype.__onDeadEnd = function __onDeadEnd(onNoSolution) {
 		}
 	}
 	if (cp === null) {
-        // Console.log("no solution");
 		return onNoSolution();
 	} // Truly unsolvable.
 
