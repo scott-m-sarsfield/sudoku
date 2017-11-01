@@ -109,7 +109,7 @@ SudokuGenerator.prototype.unsetNCells = function unsetNCells(cells, n) {
 		}
 
 		if (++m > 1000) {
-			console.log('pressure value (unsetNCells)');
+			console.log('pressure value (unsetNCells)'); // eslint-disable-line no-console
 			break;
 		}
 	}

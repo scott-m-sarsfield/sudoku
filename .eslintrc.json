@@ -1,0 +1,23 @@
+{
+    "extends":[
+        "eslint:recommended",
+        "plugin:react/recommended"
+    ],
+	"env":{
+		"browser":true,
+		"node":true
+	},
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "jsx": true
+        }
+    },
+	"plugins":["react"],
+    "rules": {
+        "semi": 2,
+		"no-console":1,
+        "react/no-unused-prop-types":1
+    }
+}

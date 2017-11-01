@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const gulp = require('gulp');
 
 const browserify = require('browserify');
@@ -82,7 +83,6 @@ gulp.task('renderStatic', () => {
 });
 
 gulp.task('copy', () => {
-    // Console.log(argv);
 	const destination = argv.dest || argv.d;
 	if (!destination) {
 		console.log('Usage:\ngulp copy --dest <destination>');

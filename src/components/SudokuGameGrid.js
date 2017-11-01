@@ -1,6 +1,7 @@
 /* eslint-disable unicorn/filename-case */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import assign from 'object-assign';
 
 const styles = {
@@ -31,6 +32,18 @@ const NROWS = 9;
 const NCOLS = 9;
 
 class SudokuGameCell extends React.Component {
+
+	static get propTypes() {
+		return {
+			row: PropTypes.any,
+			col: PropTypes.any,
+			given: PropTypes.any,
+			value: PropTypes.any,
+			highlighted: PropTypes.any,
+			options: PropTypes.any,
+			highlightClass: PropTypes.any
+		};
+	}
 
 	getCellStyleByXY(i, j) {
 		let cellStyle = assign({}, styles.cell);
@@ -120,20 +133,27 @@ class SudokuGameCell extends React.Component {
 }
 
 export default class SudokuGameGrid extends React.Component {
+	static get propTypes() {
+		return {
+			onSelectCell: PropTypes.func,
+			grid: PropTypes.any,
+			highlightedCellIndex: PropTypes.any,
+			highlightClass: PropTypes.any
+		};
+	}
+
 	constructor(props) {
 		super(props);
 		this.handleClick = this.handleClick.bind(this);
 	}
 
 	handleClick(e) {
-        // ;
-
 		let elm = e.target;
 		while (elm && !elm.className.match('sudoku_cell')) {
 			elm = elm.parentElement;
 		}
 		if (!elm) {
-			console.error('can\'t find cell');
+			console.error('can\'t find cell'); // eslint-disable-line no-console
 			return;
 		}
 
@@ -144,7 +164,7 @@ export default class SudokuGameGrid extends React.Component {
 	render() {
 		const srows = [];
 
-		const grid = this.props.grid;
+		const {grid, highlightedCellIndex} = this.props;
 
 		let i;
 		let j;
@@ -158,9 +178,7 @@ export default class SudokuGameGrid extends React.Component {
 					const _options = grid.cells[i][j].notes.options;
 
 					const index = (i * GRID_SIZE) + j;
-					const _highlighted = (index === this.props.highlighted_cell_index);
-
-                    // Console.log(this.props.highlightClass);
+					const _highlighted = (index === highlightedCellIndex);
 
 					cells.push(
                         <SudokuGameCell

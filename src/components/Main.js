@@ -1,6 +1,7 @@
 /* eslint-disable unicorn/filename-case */
 /* global window, localStorage */
 import React from 'react';
+import PropTypes from 'prop-types';
 import SudokuGrid from '../model/SudokuGrid';
 import SudokuSolver from '../model/SudokuSolver';
 import SudokuGenerator from '../model/SudokuGenerator';
@@ -18,9 +19,11 @@ try {
 
 const GRID_SIZE = 9;
 
+const LOCAL_STORAGE_KEY = 'game_in_progress';
+
 function loadGame() {
 	try {
-		const savedData = localStorage.getItem('game_in_progress');
+		const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
 		if (savedData) {
 			_generatedPuzzle.setCells(
                 JSON.parse(savedData).cells || null
@@ -37,7 +40,7 @@ function loadGame() {
 
 function saveGame() {
 	try {
-		localStorage.setItem('game_in_progress', JSON.stringify(_generatedPuzzle));
+		localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(_generatedPuzzle));
 	} catch (err) {
         /* Nothing */
 	}
@@ -74,7 +77,7 @@ function checkSolution() {
 	let nWrong = 0;
 	for (i = 0; i < l; i++) {
 		if (userSolution[i]) {
-			if (userSolution[i] === actualSolution[i]) {
+			if (parseInt(userSolution[i], 10) === parseInt(actualSolution[i], 10)) {
 				nCorrect++;
 			}	else {
 				nWrong++;
@@ -160,6 +163,15 @@ let SudokuTextSize = calcTextSize(DeviceHeight, DeviceWidth);
 //------------------------------------------------------------------------------
 
 class ButtonPanel extends React.Component {
+
+	static get propTypes() {
+		return {
+			activeButtons: PropTypes.any,
+			onClear: PropTypes.func,
+			onNumberSelect: PropTypes.func
+		};
+	}
+
 	constructor(props) {
 		super(props);
 		this.isActiveOption = this.isActiveOption.bind(this);
@@ -196,15 +208,15 @@ class ButtonPanel extends React.Component {
                 <div className="clear-button-container">
                     {clearButton}
                 </div>
-                <div className="option-buttons-container" onTouchTap={e => {
-                    // ;
-	console.log(e.target.dataset.value);
-	this.props.onNumberSelect(e.target.dataset.value);
-}}>
+                <div className="option-buttons-container" onTouchTap={this.onTouchTapButtonInContainer.bind(this)}>
                     {buttons}
                 </div>
             </div>
 		);
+	}
+
+	onTouchTapButtonInContainer(e) {
+		this.props.onNumberSelect(e.target.dataset.value);
 	}
 }
 
@@ -247,20 +259,15 @@ class Main extends React.Component {
 
 	handleWindowResize() {
 		SudokuTextSize = calcTextSize(window.innerHeight, window.innerWidth);
-        // Console.log("resized");
 		this.setState({});
 	}
 
 	handleChange(e) {
-        // Console.log(e.target.value);
-
 		const elm = e.target;
 
 		let x = elm.dataset.x;
 		let y = elm.dataset.y;
 		const v = elm.value;
-
-		console.log('Changed (' + x + ',' + y + ') to "' + v + '"');
 
 		let n = '';
 		try {
@@ -280,7 +287,6 @@ class Main extends React.Component {
 
 	handleClear() {
 		const mat = matrix(GRID_SIZE, GRID_SIZE, null);
-		console.log(mat);
 		unsolvedGrid.setCells(
             mat
         );
@@ -316,7 +322,6 @@ class Main extends React.Component {
 	}
 
 	handleClearCell() {
-        // ;
 		const col = this.state.highlightedCellCol;
 		const row = this.state.highlightedCellRow;
 
@@ -443,7 +448,7 @@ class Main extends React.Component {
             <div>
                 <div style={{textAlign: 'center'}}>How To Play</div>
                 <ul>
-                    <li>(Ask Google.  I'll add this later.)</li>
+                    <li>{`(Ask Google.  I'll add this later.)`}</li>
                     <br />
                     <li><button onTouchTap={this.handleChangeMenu.bind(this, MENU_MAIN)}>Back</button></li>
                   </ul>

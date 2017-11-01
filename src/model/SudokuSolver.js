@@ -22,7 +22,7 @@ Queue.prototype.dequeue = function dequeue() {
 
 function SudokuSolver(grid) {
 	if (!(grid instanceof SudokuGrid)) {
-		console.error('SudokuGrid not provided to SudokuSolver.', grid, 'provided instead.');
+		console.error('SudokuGrid not provided to SudokuSolver.', grid, 'provided instead.'); // eslint-disable-line no-console
 		return;
 	}
 	this.originalGrid = grid;
@@ -147,7 +147,7 @@ SudokuSolver.prototype.getEntity = function getEntity(type, number) {
 		case ENT_BOX:
 			return this.getBox(number);
 		default:
-			console.error('Invalid entity requested.');
+			console.error('Invalid entity requested.'); // eslint-disable-line no-console
 
 	}
 };
@@ -446,7 +446,7 @@ SudokuSolver.prototype.__onDeadEnd = function __onDeadEnd(onNoSolution) {
 };
 
 SudokuSolver.prototype.__onTimeout = function __onTimeout() {
-	console.log('Safety Valve Released');
+	console.log('Safety Valve Released'); // eslint-disable-line no-console
 };
 
 SudokuSolver.prototype.__onFork = function __onFork() {

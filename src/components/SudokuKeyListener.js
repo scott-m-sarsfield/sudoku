@@ -4,6 +4,7 @@
 // kind of a bastardization of the React components, but it helps simplify things somewhat.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import Constants from '../constants/Constants';
 
 const keycode = require('keycode');
@@ -11,6 +12,17 @@ const keycode = require('keycode');
 const GRID_SIZE = Constants.GRID_SIZE;
 
 export default class SudokuKeyListener extends React.Component {
+
+	static get propTypes() {
+		return {
+			highlightedCellIndex: PropTypes.any,
+			onSelectCell: PropTypes.func,
+			onClearCell: PropTypes.func,
+			onNumberInput: PropTypes.func,
+			onSpaceBar: PropTypes.func
+		};
+	}
+
 	constructor(props) {
 		super(props);
 		this.handleKeyboardEvent = this.handleKeyboardEvent.bind(this);
@@ -30,7 +42,7 @@ export default class SudokuKeyListener extends React.Component {
 	handleKeyboardEvent(e) {
 		const key = e.keyCode || e.which;
 
-		const _cellIndex = this.props.highlighted_cell_index;
+		const _cellIndex = this.props.highlightedCellIndex;
 		const _onSelectCell = this.props.onSelectCell;
 		const _onClearCell = this.props.onClearCell;
 		const _onNumberInput = this.props.onNumberInput;
@@ -93,7 +105,6 @@ export default class SudokuKeyListener extends React.Component {
 			case 'numpad 8':
 			case 'numpad 9':
 				n = parseInt(translatedKey.match(/[1-9]/)[0], 10);
-				console.log('typed in number', n);
 				_onNumberInput(n);
 				break;
 			default:
