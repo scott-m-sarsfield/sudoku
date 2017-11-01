@@ -99,9 +99,9 @@ class SudokuGameCell extends React.Component {
 		const j = this.props.col;
 		let spanStyle = {};
 
-		const _given = this.props.given;// Grid.isGiven(j+1,i+1);
-		const _value = this.props.value;// Grid.get(j+1,i+1);
-		const _options = this.props.options;// Grid.cells[i][j].notes.options;
+		const _given = this.props.given;
+		const _value = this.props.value;
+		const _options = this.props.options;
 
 		if (_given) {
 			spanStyle = assign(spanStyle, {fontWeight: 'bold'});
@@ -164,32 +164,14 @@ export default class SudokuGameGrid extends React.Component {
 	render() {
 		const srows = [];
 
-		const {grid, highlightedCellIndex} = this.props;
-
-		let i;
-		let j;
+        const {grid} = this.props;
 
 		if (grid) {
-			for (i = 0; i < NROWS; i++) {
+			for (let i = 0; i < NROWS; i++) {
 				const cells = [];
-				for (j = 0; j < NCOLS; j++) {
-					const _given = grid.isGiven(j + 1, i + 1);
-					const _value = grid.get(j + 1, i + 1);
-					const _options = grid.cells[i][j].notes.options;
-
-					const index = (i * GRID_SIZE) + j;
-					const _highlighted = (index === highlightedCellIndex);
-
-					cells.push(
-                        <SudokuGameCell
-                            key={(i * GRID_SIZE) + j}
-                            given={_given}
-                            value={_value}
-                            options={_options}
-                            row={i}
-                            col={j}
-                            highlightClass={this.props.highlightClass}
-                            highlighted={_highlighted} />
+				for (let j = 0; j < NCOLS; j++) {
+                    cells.push(
+                        this.renderCell({i,j})
                     );
 				}
 				srows.push(
@@ -209,4 +191,27 @@ export default class SudokuGameGrid extends React.Component {
             </table>
 		);
 	}
+
+    renderCell({i,j}){
+        const {grid, highlightedCellIndex} = this.props;
+
+        const _given = grid.isGiven(j + 1, i + 1);
+        const _value = grid.get(j + 1, i + 1);
+        const _options = grid.cells[i][j].notes.options;
+
+        const index = (i * GRID_SIZE) + j;
+        const _highlighted = (index === highlightedCellIndex);
+
+        return (
+            <SudokuGameCell
+                key={(i * GRID_SIZE) + j}
+                given={_given}
+                value={_value}
+                options={_options}
+                row={i}
+                col={j}
+                highlightClass={this.props.highlightClass}
+                highlighted={_highlighted} />
+        );
+    }
 }
