@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "gulp"
+    "start": "gulp",
+    "test": "xo"
   },
   "author": "Scott Sarsfield",
   "license": "UNLICENSED",
@@ -16,6 +17,7 @@
     "browser-sync": "^2.14.0",
     "browserify": "^13.1.0",
     "chai": "*",
+    "eslint-plugin-react": "^7.4.0",
     "gulp": "^3.9.1",
     "gulp-ext-replace": "^0.3.0",
     "gulp-html-prettify": "0.0.1",
@@ -30,6 +32,7 @@
     "reactify": "*",
     "vinyl-buffer": "*",
     "vinyl-source-stream": "*",
+    "xo": "^0.18.2",
     "yargs": "^5.0.0"
   },
   "dependencies": {
@@ -37,8 +40,31 @@
     "jquery": "^3.1.0",
     "keycode": "^2.1.7",
     "object-assign": "^4.1.0",
+    "prop-types": "^15.6.0",
     "react": "^15.3.1",
     "react-dom": "^15.3.1",
     "react-tap-event-plugin": "^2.0.1"
+  },
+  "xo": {
+      "extends":[
+          "plugin:react/recommended"
+      ],
+  	"env":{
+  		"browser":true,
+  		"node":true
+  	},
+      "parserOptions": {
+          "ecmaVersion": 6,
+          "sourceType": "module",
+          "ecmaFeatures": {
+              "jsx": true
+          }
+      },
+  	"plugins":["react"],
+      "rules": {
+          "semi": 2,
+  		"no-console":1,
+          "react/no-unused-prop-types":1
+      }
   }
 }

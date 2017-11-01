@@ -1,139 +1,132 @@
-/* jshint esversion: 6 */
+/* eslint-disable func-names, unicorn/filename-case */
 
+import clone from 'clone';
 import SudokuGrid from './SudokuGrid';
 import SudokuSolver from './SudokuSolver';
-import clone from 'clone';
 
-// utils
+// Utils
 
-function randInt(ceil){
-    return Math.floor( Math.random()*ceil );
+function randInt(ceil) {
+	return Math.floor(Math.random() * ceil);
 }
 
-
-
-function SudokuGenerator(){
+function SudokuGenerator() {
 }
 
 const GRID_SIZE = 9;
 
-// seed an initial 12.
-SudokuGenerator.prototype.randomInitCells = function randomInitCells(){
-    let cells = [];
-    let i,j,l = GRID_SIZE;
-    for(i=0;i<l;i++){
-        cells.push([]);
-        for(j=0;j<l;j++)
-            cells[i].push(null);
-    }
-    //console.log(cells);
+// Seed an initial 12.
+SudokuGenerator.prototype.randomInitCells = function randomInitCells() {
+	const cells = [];
+	let i;
+	let j;
+	const l = GRID_SIZE;
+	for (i = 0; i < l; i++) {
+		cells.push([]);
+		for (j = 0; j < l; j++) {
+			cells[i].push(null);
+		}
+	}
 
-    let nEntries = 12;
+	const nEntries = 12;
 
-    let o = {};
-    i = nEntries;
-    while(i > 0){
-        j = randInt(81);
-        if(o[j]) continue;
-        o[j] = true;
-        i--;
-    }
-    let a = Object.keys(o);
+	const o = {};
+	i = nEntries;
+	while (i > 0) {
+		j = randInt(81);
+		if (o[j]) {
+			continue;
+		}
+		o[j] = true;
+		i--;
+	}
+	const a = Object.keys(o);
 
-    for(i = 0; i < nEntries; i++){
-        cells[Math.floor(a[i] / GRID_SIZE)][a[i] % 9] = randInt(9)+1;
-    }
+	for (i = 0; i < nEntries; i++) {
+		cells[Math.floor(a[i] / GRID_SIZE)][a[i] % 9] = randInt(9) + 1;
+	}
 
-    /*
-    console.log(cells.reduce((a,b)=>{
-        return a.concat(b);
-    },[]));
-    */
-    return cells;
+	return cells;
 };
 
-SudokuGenerator.prototype.getSolvedSudoku = function getSolvedSudoku(){
-    let cells, grid, solver, solved = false;
+SudokuGenerator.prototype.getSolvedSudoku = function getSolvedSudoku() {
+	let cells;
+	let grid;
 
-    while(!solved){
-        cells = this.randomInitCells();
-        grid = new SudokuGrid();
-        grid.setCells(cells);
-        if(!grid.valid(false)) continue;
-        solver = new SudokuSolver(grid);
-        let solved_grid = solver.solve();
+	while (!(grid && grid.valid && grid.valid(false))) {
+		cells = this.randomInitCells();
+		grid = new SudokuGrid();
+		grid.setCells(cells);
+	}
 
-        //console.log(solved_grid);
-        //console.log(solved_grid.valid());
-
-        return solved_grid;
-        //solved = true;
-    }
-
+	const solver = new SudokuSolver(grid);
+	return solver.solve();
 };
 
-SudokuGenerator.prototype.unsetNCells = function unsetNCells(cells,n){
+SudokuGenerator.prototype.unsetNCells = function unsetNCells(cells, n) {
+	let nUnset = 0;
 
-    let nUnset = 0;
+	const o = {};
 
-    let i = 0;
-    let o = {};
+	let nChosen = 0;
 
-    let nChosen = 0;
+	function pickNextCell() {
+		let j = randInt(81);
+		while (o[j] !== undefined) {
+			j = randInt(81);
+		}
+		nChosen++;
+		return j;
+	}
 
-    function pickNextCell(){
-        let j = randInt(81);
-        while(o[j] !== undefined) j = randInt(81);
-        nChosen++;
-        return j;
-    }
+	function onSuccess(j) {
+		o[j] = true;
+		nUnset++;
+	}
+	function onFailure(j) {
+		o[j] = false;
+	}
 
-    function onSuccess(j){
-        o[j] = true;
-        nUnset++;
-    }
-    function onFailure(j){
-        o[j] = false;
-    }
+	let grid;
+	let solver;
 
-    let grid, solver;
+	let m = 0;
 
-    let m =0;
+	while (nUnset < n && nChosen < 81) {
+		const index = pickNextCell();
+		const modifiedCells = clone(cells);
+		modifiedCells[Math.floor(index / GRID_SIZE)][index % GRID_SIZE] = null;
 
-    while(nUnset < n && nChosen < 81){
+		grid = new SudokuGrid();
+		grid.setCells(modifiedCells);
+		solver = new SudokuSolver(grid);
 
-        let index = pickNextCell();
-        let mod_cells = clone(cells);
-        mod_cells[Math.floor(index / GRID_SIZE)][index % GRID_SIZE] = null;
+		if (solver.hasMultipleSolutions()) {
+			onFailure(index);
+		} else {
+			onSuccess(index);
+			cells = modifiedCells;
+		}
 
-        grid = new SudokuGrid();
-        grid.setCells(mod_cells);
-        solver = new SudokuSolver(grid);
+		if (++m > 1000) {
+			console.log('pressure value (unsetNCells)'); // eslint-disable-line no-console
+			break;
+		}
+	}
 
-        if(solver.hasMultipleSolutions()){
-            onFailure(index);
-        }else{
-            onSuccess(index);
-            cells = mod_cells;
-        }
-
-        if(++m > 1000){ console.log("pressure value (unsetNCells)"); break;}
-    }
-
-    return cells;
+	return cells;
 };
 
-SudokuGenerator.prototype.generate = function generate(nGiven){
+SudokuGenerator.prototype.generate = function generate(nGiven) {
+	const nToBeRemoved = (GRID_SIZE * GRID_SIZE) - nGiven;
 
-    let nToBeRemoved = GRID_SIZE*GRID_SIZE - nGiven;
+	let solvedCells = this.getSolvedSudoku().toMatrix();
 
-    let solved_cells = this.getSolvedSudoku().toMatrix();
+	solvedCells = this.unsetNCells(solvedCells, nToBeRemoved);
 
-    solved_cells = this.unsetNCells(solved_cells,nToBeRemoved);
-
-    let grid = new SudokuGrid();
-    grid.setCells(solved_cells);
-    return grid;
+	const grid = new SudokuGrid();
+	grid.setCells(solvedCells);
+	return grid;
 };
 
 export default SudokuGenerator;

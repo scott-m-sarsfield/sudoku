@@ -1,74 +1,96 @@
-/* jshint esversion:6 */
+/* eslint-disable unicorn/filename-case */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
-export default class BezierMenu extends React.Component{
-    constructor(props){
-        super(props);
-        this.bounceOut = this.bounceOut.bind(this);
-        this.dropIn = this.dropIn.bind(this);
-    }
+export default class BezierMenu extends React.Component {
 
-    componentDidMount(){
-        if(this.props.show) this.dropIn();
-        else{
-            this.refs.screen.className = "inactive";
-        }
-    }
+	static get propTypes() {
+		return {
+			show: PropTypes.bool,
+			children: PropTypes.any,
+			onClose: PropTypes.func
+		};
+	}
 
-    dropIn(){
-        var elm  = this.refs.menu;
-        //console.log(elm);
+	constructor(props) {
+		super(props);
+		this.bounceOut = this.bounceOut.bind(this);
+		this.dropIn = this.dropIn.bind(this);
+	}
 
+	componentDidMount() {
+		if (this.props.show) {
+			this.dropIn();
+		}	else {
+			this.screen.className = 'inactive';
+		}
+	}
 
-        elm.style.transitionDelay = '0.5s';
-        elm.style.transitionDuration = '0.5s';
-        elm.style.transitionTimingFunction = 'cubic-bezier(1,.83,.53,1.08)';
+	dropIn() {
+		const elm = this.menu;
 
-        var scr = this.refs.screen;
-        scr.className = "";
+		elm.style.transitionDelay = '0.5s';
+		elm.style.transitionDuration = '0.5s';
+		elm.style.transitionTimingFunction = 'cubic-bezier(1,.83,.53,1.08)';
 
-        setTimeout(()=>{
-            scr.className = "visible";
-            elm.className = "enteredScene";
+		const scr = this.screen;
+		scr.className = '';
 
-        },0);
-    }
+		setTimeout(() => {
+			scr.className = 'visible';
+			elm.className = 'enteredScene';
+		}, 0);
+	}
 
-    bounceOut(){
-        var elm  = this.refs.menu;
-        //console.log(elm);
-        elm.style.transitionDelay = "0s";
-        elm.style.transitionTimingFunction = "cubic-bezier(.5, .36, 0.28, -.66)";
-        elm.style.transitionDuration = "0.8s";
-        elm.className = "";
-        var scr = this.refs.screen;
-        scr.className = "";
-        setTimeout(()=>{
-            scr.className = "inactive";
-        },1000);
-    }
+	bounceOut() {
+		const elm = this.menu;
 
-    componentWillReceiveProps(np){
-        if(this.props.show && !np.show) this.bounceOut();
-        if(!this.props.show && np.show) this.dropIn();
-    }
+		elm.style.transitionDelay = '0s';
+		elm.style.transitionTimingFunction = 'cubic-bezier(.5, .36, 0.28, -.66)';
+		elm.style.transitionDuration = '0.8s';
 
-    shouldComponentUpdate(np,ns){
-        return np.show;
-    }
+		elm.className = '';
 
-    render(){
+		const scr = this.screen;
+		scr.className = '';
 
-        let children = this.props.children || null;
+		setTimeout(() => {
+			scr.className = 'inactive';
+		}, 1000);
+	}
 
-        return(
+	componentWillReceiveProps(np) {
+		if (this.props.show && !np.show) {
+			this.bounceOut();
+		}
+		if (!this.props.show && np.show) {
+			this.dropIn();
+		}
+	}
+
+	shouldComponentUpdate(np) {
+		return np.show;
+	}
+
+	render() {
+		const children = this.props.children || null;
+
+		const screenRef = r => {
+			this.screen = r;
+		};
+
+		const menuRef = r => {
+			this.menu = r;
+		};
+
+		return (
             <div>
-            <div ref="screen" id="screen" onTouchTap={this.props.onClose}/>
-            <div ref="menu" id="menu">
-            {children}
+                <div ref={screenRef} id="screen" onTouchTap={this.props.onClose} />
+                <div ref={menuRef} id="menu">
+                    {children}
+                </div>
             </div>
-            </div>
-        );
-    }
+		);
+	}
 }
